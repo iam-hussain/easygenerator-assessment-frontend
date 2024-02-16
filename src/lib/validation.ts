@@ -1,43 +1,42 @@
 import * as z from "zod";
 
 const messages = {
-  required: "Required field",
+  string_invalid: "Must be a valid string",
   email_required: "Email is an required field",
+  email_invalid: "Must be a valid email address",
   name_required: "Name is an required field",
+  name_min_length_2: "Name must be at least 2 characters long",
   password_required: "Password is an required field",
-  valid_string: "Must be a valid string",
-  valid_email: "Must be a valid email address",
-  min_length_2: "Name must be at least 2 characters long",
-  min_length_8: "Password must be at least 8 characters long",
-  need_one_letter: "Password must contain at least one letter",
-  need_one_number: "Password must contain at least one number",
-  need_one_special_char: "Password must contain at least one special character",
+  password_min_length_8: "Password must be at least 8 characters long",
+  password_need_one_letter: "Password must contain at least one letter",
+  password_need_one_number: "Password must contain at least one number",
+  password_need_one_special_char:
+    "Password must contain at least one special character",
 };
 
 const email = z
   .string({
     required_error: messages.email_required,
-    invalid_type_error: messages.valid_email,
+    invalid_type_error: messages.email_invalid,
   })
-  .email({ message: messages.valid_email });
+  .email(messages.email_invalid);
 
 const name = z
   .string({
     required_error: messages.name_required,
-    invalid_type_error: messages.valid_string,
+    invalid_type_error: messages.string_invalid,
   })
-  .min(2, {
-    message: messages.min_length_2,
-  });
+  .min(2, messages.name_min_length_2);
 
 const password = z
   .string({
     required_error: messages.password_required,
-    invalid_type_error: messages.valid_string,
+    invalid_type_error: messages.string_invalid,
   })
-  .min(8, {
-    message: messages.min_length_8,
-  });
+  .min(8, messages.password_min_length_8)
+  .regex(/[a-zA-Z]/, messages.password_need_one_letter)
+  .regex(/\d/, messages.password_need_one_number)
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, messages.password_need_one_special_char);
 
 const schemas = {
   login: z.object({ email, password }),
