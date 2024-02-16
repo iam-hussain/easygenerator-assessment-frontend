@@ -24,7 +24,12 @@ export default function Register() {
         <form className="grid gap-4" onSubmit={(e) => handleOnSubmit(e)}>
           <label className="input input-bordered flex items-center gap-2">
             <BiSolidRename className="w-4 h-4 opacity-70" />
-            <input type="text" className="grow" placeholder="Username" />
+            <input
+              type="text"
+              className="grow"
+              placeholder="Name"
+              autoComplete="given-name"
+            />
           </label>
           <label className="input input-bordered flex items-center gap-2">
             <MdEmail className="w-4 h-4 opacity-70" />
