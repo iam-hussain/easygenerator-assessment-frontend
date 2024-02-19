@@ -1,9 +1,9 @@
 "use client";
-import Icon from "@/components/atoms/icon";
-import Input from "@/components/atoms/input";
+import { setTokenCookie } from "@/lib/cookies";
+import fetcher from "@/lib/fetcher";
 import schemas, { LoginSchemaValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 
 const defaultValues: Partial<LoginSchemaValues> = {};
@@ -12,10 +12,11 @@ type LoginFormProps = {
   onSuccess?: () => void;
 };
 
-function LoginForm({}: LoginFormProps) {
+function LoginForm({ onSuccess }: LoginFormProps) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<LoginSchemaValues>({
     resolver: zodResolver(schemas.register),
@@ -24,11 +25,44 @@ function LoginForm({}: LoginFormProps) {
   });
 
   async function onSubmit(variables: LoginSchemaValues) {
-    console.log("Hello", variables);
+    console.log({ variables });
+    try {
+      const response = await fetcher.post("/auth/login", variables);
+      setTokenCookie(response.data.access_token);
+      if (response.data.access_token && onSuccess) {
+        onSuccess();
+      }
+      return response;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 412) {
+        setError("email", {
+          type: "manual",
+          message: "Email not registered",
+        });
+      } else if (
+        error instanceof AxiosError &&
+        error.response?.status === 422
+      ) {
+        setError("password", {
+          type: "manual",
+          message: "Incorrect password provided",
+        });
+      } else {
+        setError("password", {
+          type: "manual",
+          message: "Unexpected server error, try later!",
+        });
+      }
+      console.error(error);
+    }
   }
 
   return (
-    <form className="grid space-y-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="grid space-y-4"
+      name="login"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <label className="form-control w-full">
         <input
           type="text"

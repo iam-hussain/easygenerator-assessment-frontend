@@ -1,9 +1,20 @@
 "use client";
 import LoginForm from "@/components/organisms/login-form";
+import { getTokenCookie } from "@/lib/cookies";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Login() {
   const router = useRouter();
+
+  useEffect(() => {
+    if (document) {
+      const token = getTokenCookie();
+      if (token) {
+        router.push("/home");
+      }
+    }
+  }, [router]);
 
   return (
     <div className="card w-96 bg-base-100 shadow-xl select-none">
@@ -14,7 +25,7 @@ export default function Login() {
             Access your account to continue using our application.
           </p>
         </div>
-        <LoginForm />
+        <LoginForm onSuccess={() => router.push("/home")} />
 
         <div className="grid gap-2 border-t pt-4">
           <p className="text-base ">Don&apos;t have an account?</p>

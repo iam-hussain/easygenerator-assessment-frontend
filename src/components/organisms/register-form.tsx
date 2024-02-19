@@ -1,9 +1,9 @@
 "use client";
-import Icon from "@/components/atoms/icon";
-import Input from "@/components/atoms/input";
+import { setTokenCookie } from "@/lib/cookies";
+import fetcher from "@/lib/fetcher";
 import schemas, { RegisterSchemaValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 
 const defaultValues: Partial<RegisterSchemaValues> = {};
@@ -12,10 +12,11 @@ type RegisterFormProps = {
   onSuccess?: () => void;
 };
 
-function RegisterForm({}: RegisterFormProps) {
+function RegisterForm({ onSuccess }: RegisterFormProps) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<RegisterSchemaValues>({
     resolver: zodResolver(schemas.register),
@@ -24,11 +25,35 @@ function RegisterForm({}: RegisterFormProps) {
   });
 
   async function onSubmit(variables: RegisterSchemaValues) {
-    console.log("Hello", variables);
+    try {
+      const response = await fetcher.post("/auth/register", variables);
+      setTokenCookie(response.data.access_token);
+      if (response.data.access_token && onSuccess) {
+        onSuccess();
+      }
+      return response;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 412) {
+        setError("email", {
+          type: "manual",
+          message: "Email already registered",
+        });
+      } else {
+        setError("password", {
+          type: "manual",
+          message: "Unexpected server error, try later!",
+        });
+      }
+      console.error(error);
+    }
   }
 
   return (
-    <form className="grid space-y-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="grid space-y-4"
+      name="register"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <label className="form-control w-full">
         <input
           type="text"
