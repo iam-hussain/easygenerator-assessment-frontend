@@ -31,6 +31,7 @@ function RegisterForm({ onSuccess }: RegisterFormProps) {
       if (response.data.access_token && onSuccess) {
         onSuccess();
       }
+
       return response;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 412) {
