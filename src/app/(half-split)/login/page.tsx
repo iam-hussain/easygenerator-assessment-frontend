@@ -1,5 +1,6 @@
 "use client";
 import LoginForm from "@/components/organisms/login-form";
+import RegisterForm from "@/components/organisms/register-form";
 import { getTokenCookie } from "@/lib/cookies";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

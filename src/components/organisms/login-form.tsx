@@ -19,7 +19,7 @@ function LoginForm({ onSuccess }: LoginFormProps) {
     setError,
     formState: { errors },
   } = useForm<LoginSchemaValues>({
-    resolver: zodResolver(schemas.register),
+    resolver: zodResolver(schemas.login),
     defaultValues,
     mode: "onSubmit",
   });
